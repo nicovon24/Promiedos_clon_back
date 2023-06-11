@@ -32,8 +32,20 @@ const getGoalscorers = async (req, res) => {
 			if (response.data) data = response.data;
 		}
 
-		if (data?.scorers?.length > 0)
-			res.status(200).send({ scorers: data.scorers });
+		data = data.scorers;
+
+		const segmentedByPage = {};
+		const separator = 10;
+
+		for (let i = 1; i < Math.floor(data.length / separator); i++) {
+			// console.log(i, i * separator, (i + 1) * separator);
+			if (i === 1) segmentedByPage[i] = data.slice(0, separator);
+			else {
+				segmentedByPage[i] = data.slice((i - 1) * separator, i * separator);
+			}
+		}
+
+		if (data?.length > 0) res.status(200).send({ scorers: segmentedByPage });
 		else throw new Error("No goalscorers found");
 	} catch (err) {
 		res.status(200).send({ error: err.message });
